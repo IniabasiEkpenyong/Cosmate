@@ -30,6 +30,8 @@ public class UI {
     ChessVisualizer[][] chessBoard = new ChessVisualizer[8][8];
     // public variable stores chessBoard data throughout classes
 
+    private ChessAI ai;
+    private boolean vsComputer = true; // Set to true to play against AI
 
     // constructor that initializes windows with chessboard and pieces
     public UI() {
@@ -61,6 +63,8 @@ public class UI {
         stale = false;
         whiteKing = new Move(7, 3);
         blackKing = new Move(0, 3);
+
+        ai = new ChessAI(this);
     }
 
     // iterates through possible moves of player for checkmate
@@ -222,35 +226,20 @@ public class UI {
 
     // Sets the button listeners to the pieces of whoever's turn it is and removes listeners from the opposing player's pieces
     private void changeTurn() {
-        // call setHighlight() with no parameters in order to clear the highlighted spaces
-        setHighlight();
-        resetcolor();
-
-        // starts turn with white
-        if (turn == -1) {
+        if (turn == -1 || turn == 1) {
             turn = 0;
-        }
-        else {
-            // swaps turns
-            if (turn == 0) {
-                turn = 1;
-            }
-            else {
-                turn = 0;
-            }
-
-            // Checks if king is in check
-            check = isChecked();
-
-            // Game ends with checkmate
-            if (check) {
-                if (checkCheckmate()) {
-                    return;
-                }
-            }
-            // If no moves are available, changes turn to the other player
-            if (stale) {
-                changeTurn();
+            label.setText("Player 1 turn");
+        } else {
+            turn = 1;
+            label.setText("Player 2 turn");
+            
+            if (vsComputer) {
+                // Add small delay to make the AI move visible
+                javax.swing.Timer timer = new javax.swing.Timer(500, e -> {
+                    makeAIMove();
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
         }
 
@@ -289,24 +278,26 @@ public class UI {
     // Adds listener to show valid move locations with highlight
     private void addHighlightListener(ChessVisualizer b, UI player) {
         b.button.addActionListener(e -> {
-            // doesn't highlight if no piece is present
+            // Reset previous piece's color if exists
             if (currentPiece != null) {
-                currentPiece.button.setBackground(currentPiece.col);
+                // Reset to original board color instead of keeping cyan
+                if (currentPiece.xPoint % 2 == currentPiece.yPoint % 2) {
+                    currentPiece.button.setBackground(new Color(127, 166, 80));  // Green
+                } else {
+                    currentPiece.button.setBackground(Color.WHITE);
+                }
                 currentPiece = null;
-
             }
+            
             LinkedList<Move> moves = b.piece.getPossibleMoves(player);
             setHighlight(moves);
             currentPiece = b;
-            // System.out.println("set currentPiece to "+ b.getSymbol());
-            currentPiece.button.setBackground(Color.cyan);
+            currentPiece.button.setBackground(Color.yellow);  // Change from cyan to yellow to match move highlights
         });
     }
 
     // Adds listener to a valid move location to accept a move
     private void addMoveListener(ChessVisualizer b, UI c) {
-        // informed of lambda expression and how to use actionListener
-        // https://www.codejava.net/java-core/the-java-language/java-8-lambda-listener-example
         b.button.addActionListener(e -> {
             System.out.println(currentPiece.getSymbol() + " moved");
             // remove the opponent's newPiece if occupying clicked square
@@ -327,13 +318,28 @@ public class UI {
             ChessVisualizer newPiece = chessBoard[currentPiece.piece.x][currentPiece.piece.y];
 
             removeListeners(newPiece, c);
-            newPiece.button.setBackground(newPiece.col);
+            // Reset to original board color
+            if (newPiece.xPoint % 2 == newPiece.yPoint % 2) {
+                newPiece.button.setBackground(new Color(127, 166, 80));  // Green
+            } else {
+                newPiece.button.setBackground(Color.WHITE);
+            }
 
             // remove newPiece from old location and sets image in new space
             newPiece.removePiece();
             b.piece.updateLocation(b.xPoint, b.yPoint);
+            
+            // Clear all highlights
+            setHighlight();
+            
             currentPiece = null;
-            changeTurn();
+
+            // Check for checkmate first
+            if (!checkCheckmate()) {
+                // If not checkmate, check for check condition
+                check = isChecked();
+                changeTurn();
+            }
         });
     }
 
@@ -346,19 +352,22 @@ public class UI {
 
     // highlights a list of coordinates (moves available for a selected piece)
     private void setHighlight(LinkedList<Move> moves) {
-        // possible moves are iterated through until mouse clicked possible move
-        // is found
+        // Reset previous highlights
         if (highlightSpaces.size() > 0) {
             Move move;
             while (highlightSpaces.size() > 0) {
                 move = highlightSpaces.pop();
-                chessBoard[move.getX()][move.getY()].button.setBackground(
-                        chessBoard[move.getX()][move.getY()].col);
+                // Reset to original board color
+                if (move.getX() % 2 == move.getY() % 2) {
+                    chessBoard[move.getX()][move.getY()].button.setBackground(new Color(127, 166, 80));
+                } else {
+                    chessBoard[move.getX()][move.getY()].button.setBackground(Color.WHITE);
+                }
                 removeListeners(chessBoard[move.getX()][move.getY()], this);
             }
         }
 
-        // possible moves for a piece for a player are highlighted yellow
+        // Highlight new possible moves
         Move p1;
         for (int i = 0; i < moves.size(); i++) {
             p1 = moves.get(i);
@@ -367,11 +376,10 @@ public class UI {
             addMoveListener(chessBoard[p1.getX()][p1.getY()], this);
         }
 
-        // if clicked piece exists, color background black
+        // If clicked piece exists, highlight it yellow to match possible moves
         if (currentPiece != null) {
-            currentPiece.button.setBackground(Color.BLACK);
+            currentPiece.button.setBackground(Color.yellow);
             currentPiece = null;
-
         }
     }
 
@@ -381,8 +389,12 @@ public class UI {
             Move move;
             while (highlightSpaces.size() > 0) {
                 move = highlightSpaces.pop();
-                chessBoard[move.getX()][move.getY()].button.setBackground(
-                        chessBoard[move.getX()][move.getY()].col);
+                // Use the same color logic as setcolor method
+                if (move.getX() % 2 == move.getY() % 2) {
+                    chessBoard[move.getX()][move.getY()].button.setBackground(new Color(127, 166, 80));  // Green
+                } else {
+                    chessBoard[move.getX()][move.getY()].button.setBackground(Color.WHITE);
+                }
                 removeListeners(chessBoard[move.getX()][move.getY()], this);
             }
         }
@@ -513,6 +525,24 @@ public class UI {
         }
     }
 
+    // Add this new method to handle AI moves
+    private void makeAIMove() {
+        Move[] bestMove = ai.getBestMove();
+        if (bestMove != null) {
+            int fromX = bestMove[0].getX();
+            int fromY = bestMove[0].getY();
+            int toX = bestMove[1].getX();
+            int toY = bestMove[1].getY();
+            
+            Piece movingPiece = chessBoard[fromX][fromY].piece;
+            makeMove(fromX, fromY, toX, toY, movingPiece);
+            
+            // Check for game ending conditions
+            if (!checkCheckmate()) {
+                changeTurn();
+            }
+        }
+    }
 }
 
 

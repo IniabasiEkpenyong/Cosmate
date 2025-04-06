@@ -16,18 +16,18 @@ public class Queen extends Piece {
         if (x - 1 >= 0 && player.chessBoard[x - 1][y].checkPiece() != color) {
             n = -1;
             while (x + n >= 0) {
-                if (player.chessBoard[x + n][y].hasPiece
-                        && player.chessBoard[x + n][y].checkPiece() != color) {
-                    p = new Move(x + n, y);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x + n][y].hasPiece) {
+                    if (player.chessBoard[x + n][y].checkPiece() != color) {
+                        p = new Move(x + n, y);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
-                p = new Move(x - 1, y);
+                p = new Move(x + n, y);
                 if (isLegalMove(x, y, p, player))
-                    moves.add(new Move(x + n, y));
+                    moves.add(p);
                 n--;
             }
         }
@@ -36,14 +36,14 @@ public class Queen extends Piece {
         if (x + 1 <= 7 && player.chessBoard[x + 1][y].checkPiece() != color) {
             n = 1;
             while (x + n <= 7) {            // move down
-                if (player.chessBoard[x + n][y].hasPiece
-                        && player.chessBoard[x + n][y].checkPiece() != color) {
-                    p = new Move(x + n, y);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x + n][y].hasPiece) {
+                    if (player.chessBoard[x + n][y].checkPiece() != color) {
+                        p = new Move(x + n, y);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x + n, y);
                 if (isLegalMove(x, y, p, player))
@@ -56,14 +56,14 @@ public class Queen extends Piece {
         if (y - 1 >= 0 && player.chessBoard[x][y - 1].checkPiece() != color) {
             n = -1;
             while (y + n >= 0) {            // move left
-                if (player.chessBoard[x][y + n].hasPiece
-                        && player.chessBoard[x][y + n].checkPiece() != color) {
-                    p = new Move(x, y + n);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x][y + n].hasPiece) {
+                    if (player.chessBoard[x][y + n].checkPiece() != color) {
+                        p = new Move(x, y + n);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x, y + n);
                 if (isLegalMove(x, y, p, player))
@@ -76,14 +76,14 @@ public class Queen extends Piece {
         if (y + 1 <= 7 && player.chessBoard[x][y + 1].checkPiece() != color) {
             n = 1;
             while (y + n <= 7) {
-                if (player.chessBoard[x][y + n].hasPiece
-                        && player.chessBoard[x][y + n].checkPiece() != color) {
-                    p = new Move(x, y + n);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(new Move(x, y + n));
-                        break;
+                if (player.chessBoard[x][y + n].hasPiece) {
+                    if (player.chessBoard[x][y + n].checkPiece() != color) {
+                        p = new Move(x, y + n);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(new Move(x, y + n));
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x, y + n);
                 if (isLegalMove(x, y, p, player))
@@ -97,14 +97,14 @@ public class Queen extends Piece {
                 && player.chessBoard[x - 1][y - 1].checkPiece() != color) {   // move up-left
             n = -1;
             while (x + n >= 0 && y + n >= 0) {
-                if (player.chessBoard[x + n][y + n].hasPiece
-                        && player.chessBoard[x + n][y + n].checkPiece() != color) {
-                    p = new Move(x + n, y + n);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x + n][y + n].hasPiece) {
+                    if (player.chessBoard[x + n][y + n].checkPiece() != color) {
+                        p = new Move(x + n, y + n);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x + n, y + n);
                 if (isLegalMove(x, y, p, player))
@@ -119,14 +119,14 @@ public class Queen extends Piece {
             n = -1;
             m = 1;
             while (x + n >= 0 && y + m <= 7) {
-                if (player.chessBoard[x + n][y + m].hasPiece
-                        && player.chessBoard[x + n][y + m].checkPiece() != color) {
-                    p = new Move(x + n, y + m);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x + n][y + m].hasPiece) {
+                    if (player.chessBoard[x + n][y + m].checkPiece() != color) {
+                        p = new Move(x + n, y + m);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x + n, y + m);
                 if (isLegalMove(x, y, p, player))
@@ -142,14 +142,14 @@ public class Queen extends Piece {
             n = 1;
             m = -1;
             while (x + n <= 7 && y + m >= 0) {
-                if (player.chessBoard[x + n][y + m].hasPiece
-                        && player.chessBoard[x + n][y + m].checkPiece() != color) {
-                    p = new Move(x + n, y + m);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x + n][y + m].hasPiece) {
+                    if (player.chessBoard[x + n][y + m].checkPiece() != color) {
+                        p = new Move(x + n, y + m);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x + n, y + m);
                 if (isLegalMove(x, y, p, player))
@@ -164,14 +164,14 @@ public class Queen extends Piece {
                 && player.chessBoard[x + 1][y + 1].checkPiece() != color) {   // move down-right
             n = 1;
             while (x + n <= 7 && y + n <= 7) {
-                if (player.chessBoard[x + n][y + n].hasPiece
-                        && player.chessBoard[x + n][y + n].checkPiece() != color) {
-                    p = new Move(x + n, y + n);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                        break;
+                if (player.chessBoard[x + n][y + n].hasPiece) {
+                    if (player.chessBoard[x + n][y + n].checkPiece() != color) {
+                        p = new Move(x + n, y + n);
+                        if (isLegalMove(x, y, p, player)) {
+                            moves.add(p);
+                        }
                     }
-                    break;
+                    break;  // Always break when encountering any piece
                 }
                 p = new Move(x + n, y + n);
                 if (isLegalMove(x, y, p, player))
