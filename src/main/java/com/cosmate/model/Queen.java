@@ -1,197 +1,100 @@
-package src.main.java.com.cosmate.model;
+package com.cosmate.model;
+
 import java.util.LinkedList;
 
-import UI;
-
-// implements basic rules of queen movement
 public class Queen extends Piece {
-
-    public Queen(int c, int x, int y, int t) {
-        super(c, x, y, t);
+    public Queen(int color) {
+        super(color, -1, -1, 4); // type 4 for Queen
     }
 
-    public LinkedList<Move> getPossibleMoves(UI player) {
+    @Override
+    public LinkedList<Move> getPossibleMoves(GameState gameState) {
         LinkedList<Move> moves = new LinkedList<>();
-        Move p;
-        int n, m;
-
-        // checks for moves up with queen
-        if (x - 1 >= 0 && player.chessBoard[x - 1][y].checkPiece() != color) {
-            n = -1;
-            while (x + n >= 0) {
-                if (player.chessBoard[x + n][y].hasPiece) {
-                    if (player.chessBoard[x + n][y].checkPiece() != color) {
-                        p = new Move(x + n, y);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
+        
+        // Queen combines Rook and Bishop movements
+        // Check all eight directions
+        int[][] directions = {
+            {0, 1}, {0, -1}, {1, 0}, {-1, 0},  // Rook moves
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // Bishop moves
+        };
+        
+        for (int[] dir : directions) {
+            int newX = x;
+            int newY = y;
+            
+            while (true) {
+                newX += dir[0];
+                newY += dir[1];
+                
+                if (!gameState.isValidPosition(newX, newY)) {
+                    break;
                 }
-                p = new Move(x + n, y);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n--;
+                
+                Piece targetPiece = gameState.getPieceAt(newX, newY);
+                if (targetPiece == null) {
+                    moves.add(new Move(x, y, newX, newY));
+                    continue;
+                }
+                
+                if (targetPiece.getColor() != this.color) {
+                    moves.add(new Move(x, y, newX, newY));
+                }
+                break;
             }
         }
-
-        // checks for moves down with queen
-        if (x + 1 <= 7 && player.chessBoard[x + 1][y].checkPiece() != color) {
-            n = 1;
-            while (x + n <= 7) {            // move down
-                if (player.chessBoard[x + n][y].hasPiece) {
-                    if (player.chessBoard[x + n][y].checkPiece() != color) {
-                        p = new Move(x + n, y);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x + n, y);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n++;
-            }
-        }
-
-        // checks for moves left with queen
-        if (y - 1 >= 0 && player.chessBoard[x][y - 1].checkPiece() != color) {
-            n = -1;
-            while (y + n >= 0) {            // move left
-                if (player.chessBoard[x][y + n].hasPiece) {
-                    if (player.chessBoard[x][y + n].checkPiece() != color) {
-                        p = new Move(x, y + n);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x, y + n);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n--;
-            }
-        }
-
-        // checks for moves right with queen
-        if (y + 1 <= 7 && player.chessBoard[x][y + 1].checkPiece() != color) {
-            n = 1;
-            while (y + n <= 7) {
-                if (player.chessBoard[x][y + n].hasPiece) {
-                    if (player.chessBoard[x][y + n].checkPiece() != color) {
-                        p = new Move(x, y + n);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(new Move(x, y + n));
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x, y + n);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n++;
-            }
-        }
-
-        // checks for up-right moves with queen
-        if (x - 1 >= 0 && y - 1 >= 0
-                && player.chessBoard[x - 1][y - 1].checkPiece() != color) {   // move up-left
-            n = -1;
-            while (x + n >= 0 && y + n >= 0) {
-                if (player.chessBoard[x + n][y + n].hasPiece) {
-                    if (player.chessBoard[x + n][y + n].checkPiece() != color) {
-                        p = new Move(x + n, y + n);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x + n, y + n);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n--;
-            }
-        }
-
-        // checks for moves up-right
-        if (x - 1 >= 0 && y + 1 <= 7
-                && player.chessBoard[x - 1][y + 1].checkPiece() != color) {
-            n = -1;
-            m = 1;
-            while (x + n >= 0 && y + m <= 7) {
-                if (player.chessBoard[x + n][y + m].hasPiece) {
-                    if (player.chessBoard[x + n][y + m].checkPiece() != color) {
-                        p = new Move(x + n, y + m);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x + n, y + m);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n--;
-                m++;
-            }
-        }
-
-        // checks for moves down-left
-        if (x + 1 <= 7 && y - 1 >= 0
-                && player.chessBoard[x + 1][y - 1].checkPiece() != color) {   // move down-left
-            n = 1;
-            m = -1;
-            while (x + n <= 7 && y + m >= 0) {
-                if (player.chessBoard[x + n][y + m].hasPiece) {
-                    if (player.chessBoard[x + n][y + m].checkPiece() != color) {
-                        p = new Move(x + n, y + m);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x + n, y + m);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n++;
-                m--;
-            }
-        }
-
-        // checks for moves down-right for the queen
-        if (x + 1 <= 7 && y + 1 <= 7
-                && player.chessBoard[x + 1][y + 1].checkPiece() != color) {   // move down-right
-            n = 1;
-            while (x + n <= 7 && y + n <= 7) {
-                if (player.chessBoard[x + n][y + n].hasPiece) {
-                    if (player.chessBoard[x + n][y + n].checkPiece() != color) {
-                        p = new Move(x + n, y + n);
-                        if (isLegalMove(x, y, p, player)) {
-                            moves.add(p);
-                        }
-                    }
-                    break;  // Always break when encountering any piece
-                }
-                p = new Move(x + n, y + n);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-                n++;
-            }
-        }
+        
         return moves;
     }
 
-    // checks valid moves for each piece
-    public boolean isLegalMove(int x, int y, Move move, UI player) {
-        return player.isValidMove(x, y, move.getX(), move.getY(), this);
+    @Override
+    public boolean isLegalMove(int x2, int y2, Move move, GameState gameState) {
+        // Must be either diagonal or straight movement
+        boolean isDiagonal = Math.abs(x2 - x) == Math.abs(y2 - y);
+        boolean isStraight = x == x2 || y == y2;
+        
+        if (!isDiagonal && !isStraight) {
+            return false;
+        }
+        
+        // Check path is clear
+        if (isStraight) {
+            if (x == x2) {
+                int dir = (y2 > y) ? 1 : -1;
+                for (int currentY = y + dir; currentY != y2; currentY += dir) {
+                    if (gameState.getPieceAt(x, currentY) != null) {
+                        return false;
+                    }
+                }
+            } else {
+                int dir = (x2 > x) ? 1 : -1;
+                for (int currentX = x + dir; currentX != x2; currentX += dir) {
+                    if (gameState.getPieceAt(currentX, y) != null) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            int xDir = (x2 > x) ? 1 : -1;
+            int yDir = (y2 > y) ? 1 : -1;
+            
+            int currentX = x + xDir;
+            int currentY = y + yDir;
+            
+            while (currentX != x2 && currentY != y2) {
+                if (gameState.getPieceAt(currentX, currentY) != null) {
+                    return false;
+                }
+                currentX += xDir;
+                currentY += yDir;
+            }
+        }
+        
+        return true;
     }
 
-    public boolean checked(UI c) {
-        return false;
+    @Override
+    public boolean checked(GameState gameState) {
+        return false; // Queens don't implement check detection
     }
 }
 

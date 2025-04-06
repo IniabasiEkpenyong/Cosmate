@@ -1,117 +1,74 @@
-package src.main.java.com.cosmate.model;
+package com.cosmate.model;
+
 import java.util.LinkedList;
 
-import UI;
-
-// Implements the basic rules of the bishop chess piece
 public class Bishop extends Piece {
-
-    public Bishop(int color, int x, int y, int type) {
-        super(color, x, y, type);
+    public Bishop(int color) {
+        super(color, -1, -1, 2); // type 2 for Bishop
     }
 
-    public LinkedList<Move> getPossibleMoves(UI c) {
+    @Override
+    public LinkedList<Move> getPossibleMoves(GameState gameState) {
         LinkedList<Move> moves = new LinkedList<>();
-        Move p;
-        int n, m;
-        // Check the four possible diagonal move directions for the bishop
-        // diagonal 1
-        if (x - 1 >= 0 && y - 1 >= 0
-                && c.chessBoard[x - 1][y - 1].checkPiece() != color) {   // move up-left
-            n = -1;
-            while (x + n >= 0 && y + n >= 0) {
-                if (c.chessBoard[x + n][y + n].hasPiece) {
-                    if (c.chessBoard[x + n][y + n].checkPiece() != color) {
-                        p = new Move(x + n, y + n);
-                        if (isLegalMove(x, y, p, c)) {
-                            moves.add(p);
-                        }
-                    }
+        
+        // Check all four diagonal directions
+        int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+        
+        for (int[] dir : directions) {
+            int newX = x;
+            int newY = y;
+            
+            while (true) {
+                newX += dir[0];
+                newY += dir[1];
+                
+                if (!gameState.isValidPosition(newX, newY)) {
                     break;
                 }
-                p = new Move(x + n, y + n);
-                if (isLegalMove(x, y, p, c))
-                    moves.add(p);
-                n--;
-            }
-        }
-        // diagonal 2 - up-right
-        if (x - 1 >= 0 && y + 1 <= 7
-                && c.chessBoard[x - 1][y + 1].checkPiece() != color) {
-            n = -1;
-            m = 1;
-            while (x + n >= 0 && y + m <= 7) {
-                if (c.chessBoard[x + n][y + m].hasPiece) {
-                    if (c.chessBoard[x + n][y + m].checkPiece() != color) {
-                        p = new Move(x + n, y + m);
-                        if (isLegalMove(x, y, p, c)) {
-                            moves.add(p);
-                            break;
-                        }
-                    }
-                    break;
+                
+                Piece targetPiece = gameState.getPieceAt(newX, newY);
+                if (targetPiece == null) {
+                    moves.add(new Move(x, y, newX, newY));
+                    continue;
                 }
-                p = new Move(x + n, y + m);
-                if (isLegalMove(x, y, p, c))
-                    moves.add(p);
-                n--;
-                m++;
-            }
-        }
-        // diagonal 3 - down left
-        if (x + 1 <= 7 && y - 1 >= 0
-                && c.chessBoard[x + 1][y - 1].checkPiece() != color) {
-            n = 1;
-            m = -1;
-            while (x + n <= 7 && y + m >= 0) {
-                if (c.chessBoard[x + n][y + m].hasPiece) {
-                    if (c.chessBoard[x + n][y + m].checkPiece() != color) {
-                        p = new Move(x + n, y + m);
-                        if (isLegalMove(x, y, p, c)) {
-                            moves.add(p);
-                            break;
-                        }
-                    }
-                    break;
+                
+                if (targetPiece.getColor() != this.color) {
+                    moves.add(new Move(x, y, newX, newY));
                 }
-                p = new Move(x + n, y + m);
-                if (isLegalMove(x, y, p, c))
-                    moves.add(p);
-                n++;
-                m--;
+                break;
             }
         }
-        // diagonal 4 - down-right
-        if (x + 1 <= 7 && y + 1 <= 7 && c.chessBoard[x + 1][y + 1].checkPiece()
-                != color) {
-            n = 1;
-            while (x + n <= 7 && y + n <= 7) {
-                if (c.chessBoard[x + n][y + n].hasPiece) {
-                    if (c.chessBoard[x + n][y + n].checkPiece() != color) {
-                        p = new Move(x + n, y + n);
-                        if (isLegalMove(x, y, p, c)) {
-                            moves.add(p);
-                            break;
-                        }
-                    }
-                    break;
-                }
-                p = new Move(x + n, y + n);
-                if (isLegalMove(x, y, p, c))
-                    moves.add(p);
-                n++;
-            }
-        }
+        
         return moves;
     }
 
-    public boolean isLegalMove(int x, int y, Move move, UI c) {
-        return c.isValidMove(x, y, move.getX(), move.getY(), this);
+    @Override
+    public boolean isLegalMove(int x2, int y2, Move move, GameState gameState) {
+        // Must be diagonal movement
+        if (Math.abs(x2 - x) != Math.abs(y2 - y)) {
+            return false;
+        }
+        
+        // Check path is clear
+        int xDir = (x2 > x) ? 1 : -1;
+        int yDir = (y2 > y) ? 1 : -1;
+        
+        int currentX = x + xDir;
+        int currentY = y + yDir;
+        
+        while (currentX != x2 && currentY != y2) {
+            if (gameState.getPieceAt(currentX, currentY) != null) {
+                return false;
+            }
+            currentX += xDir;
+            currentY += yDir;
+        }
+        
+        return true;
     }
 
-    public boolean checked(UI player) {
-        return false;
+    @Override
+    public boolean checked(GameState gameState) {
+        return false; // Bishops don't implement check detection
     }
-
-
 }

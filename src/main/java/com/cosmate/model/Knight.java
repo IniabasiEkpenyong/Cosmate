@@ -1,80 +1,52 @@
-package src.main.java.com.cosmate.model;
+package com.cosmate.model;
+
 import java.util.LinkedList;
 
-import UI;
-
-// implements basic rules of knight movement
 public class Knight extends Piece {
-
-    public Knight(int color, int x, int y, int type) {
-        super(color, x, y, type);
+    public Knight(int color) {
+        super(color, -1, -1, 1); // type 1 for Knight
     }
 
-    public LinkedList<Move> getPossibleMoves(UI player) {
+    @Override
+    public LinkedList<Move> getPossibleMoves(GameState gameState) {
         LinkedList<Move> moves = new LinkedList<>();
-        Move move;
-        // for horse on left
-        // l-movements to the left and right upwards
-        if (x <= 6) {
-            if (x <= 5) {
-                if (y - 1 >= 0 && player.chessBoard[x + 2][y - 1].checkPiece() != color) {
-                    move = new Move(x + 2, y - 1);
-                    if (isLegalMove(x, y, move, player))
-                        moves.add(move);
-                }
-                if (y + 1 <= 7 && player.chessBoard[x + 2][y + 1].checkPiece() != color) {
-                    move = new Move(x + 2, y + 1);
-                    if (isLegalMove(x, y, move, player))
-                        moves.add(move);
-                }
+        
+        // All possible L-shaped moves
+        int[][] knightMoves = {
+            {-2, -1}, {-2, 1},
+            {-1, -2}, {-1, 2},
+            {1, -2}, {1, 2},
+            {2, -1}, {2, 1}
+        };
+        
+        for (int[] move : knightMoves) {
+            int newX = x + move[0];
+            int newY = y + move[1];
+            
+            if (!gameState.isValidPosition(newX, newY)) {
+                continue;
             }
-            if (y - 2 >= 0 && player.chessBoard[x + 1][y - 2].checkPiece() != color) {
-                move = new Move(x + 1, y - 2);
-                if (isLegalMove(x, y, move, player))
-                    moves.add(move);
-
-            }
-            if (y + 2 <= 7 && player.chessBoard[x + 1][y + 2].checkPiece() != color) {
-                move = new Move(x + 1, y + 2);
-                if (isLegalMove(x, y, move, player))
-                    moves.add(move);
+            
+            Piece targetPiece = gameState.getPieceAt(newX, newY);
+            if (targetPiece == null || targetPiece.getColor() != this.color) {
+                moves.add(new Move(x, y, newX, newY));
             }
         }
-
-        // for horse on right
-        // l-movements to the left and right upwards and left and right downwards
-        if (x >= 1) {
-            if (x >= 2) {
-                if (y - 1 >= 0 && player.chessBoard[x - 2][y - 1].checkPiece() != color) {
-                    move = new Move(x - 2, y - 1);
-                    if (isLegalMove(x, y, move, player))
-                        moves.add(move);
-                }
-                if (y + 1 <= 7 && player.chessBoard[x - 2][y + 1].checkPiece() != color) {
-                    move = new Move(x - 2, y + 1);
-                    if (isLegalMove(x, y, move, player))
-                        moves.add(move);
-                }
-            }
-            if (y - 2 >= 0 && player.chessBoard[x - 1][y - 2].checkPiece() != color) {
-                move = new Move(x - 1, y - 2);
-                if (isLegalMove(x, y, move, player))
-                    moves.add(move);
-            }
-            if (y + 2 <= 7 && player.chessBoard[x - 1][y + 2].checkPiece() != color) {
-                move = new Move(x - 1, y + 2);
-                if (isLegalMove(x, y, move, player))
-                    moves.add(move);
-            }
-        }
+        
         return moves;
     }
 
-    public boolean isLegalMove(int x, int y, Move move, UI c) {
-        return c.isValidMove(x, y, move.getX(), move.getY(), this);
+    @Override
+    public boolean isLegalMove(int x2, int y2, Move move, GameState gameState) {
+        int dx = Math.abs(x2 - x);
+        int dy = Math.abs(y2 - y);
+        
+        // Must move in L-shape (2 squares in one direction and 1 in the other)
+        return (dx == 2 && dy == 1) || (dx == 1 && dy == 2);
     }
 
-    public boolean checked(UI c) {
-        return false;
+    @Override
+    public boolean checked(GameState gameState) {
+        return false; // Knights don't implement check detection
     }
 }

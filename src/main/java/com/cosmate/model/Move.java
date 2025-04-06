@@ -1,35 +1,90 @@
-package src.main.java.com.cosmate.model;
+package com.cosmate.model;
 // This class deals with the coordinate values of the moves of each
 // of the chess pieces
+
+/**
+ * Represents a chess move from one position to another.
+ */
 public class Move {
-    private Integer x;
-    private Integer y;
+    private int fromX;
+    private int fromY;
+    private int toX;
+    private int toY;
 
-    // constructor initialized with current coordinates
-    public Move(int x1, int y1) {
-        x = x1;
-        y = y1;
+    public Move(int fromX, int fromY, int toX, int toY) {
+        this.fromX = fromX;
+        this.fromY = fromY;
+        this.toX = toX;
+        this.toY = toY;
     }
 
-    // returns x-coordinate of piece
-    public int getX() {
-        return x;
+    /**
+     * Copy constructor
+     */
+    public Move(Move other) {
+        this.fromX = other.fromX;
+        this.fromY = other.fromY;
+        this.toX = other.toX;
+        this.toY = other.toY;
     }
 
-    // returns y-coordinate of piece
-    public int getY() {
-        return y;
+    /**
+     * Constructor for storing a single position (used for king positions)
+     */
+    public Move(int x, int y) {
+        this.fromX = x;
+        this.fromY = y;
+        this.toX = x;
+        this.toY = y;
     }
 
-    // set new coordinates
-    public void setNewValues(int x2, int y2) {
-        x = x2;
-        y = y2;
+    public int getFromX() {
+        return fromX;
+    }
+
+    public int getFromY() {
+        return fromY;
+    }
+
+    public int getToX() {
+        return toX;
+    }
+
+    public int getToY() {
+        return toY;
+    }
+
+    public void setNewValues(int x, int y) {
+        this.fromX = x;
+        this.fromY = y;
+        this.toX = x;
+        this.toY = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Move)) return false;
+        Move other = (Move) obj;
+        return fromX == other.fromX && 
+               fromY == other.fromY && 
+               toX == other.toX && 
+               toY == other.toY;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + fromX;
+        result = 31 * result + fromY;
+        result = 31 * result + toX;
+        result = 31 * result + toY;
+        return result;
     }
 
     // returns a String of the coordinates of the movement
     public String toString() {
-        return x.toString() + ", " + y.toString();
+        return fromX + ", " + fromY + " to " + toX + ", " + toY;
     }
 }
 

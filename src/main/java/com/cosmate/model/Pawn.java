@@ -1,107 +1,76 @@
-package src.main.java.com.cosmate.model;
+package com.cosmate.model;
+
 import java.util.LinkedList;
 
-import UI;
-
-// implements basic rules of pawn movement
 public class Pawn extends Piece {
-    private boolean hasMoved; // checks whether pawn has already moved
-
-    public Pawn(int color, int x, int y, int type) {
-        super(color, x, y, type);
-        hasMoved = false;
+    public Pawn(int color) {
+        super(color, -1, -1, 0); // type 0 for Pawn
     }
 
-    public LinkedList<Move> getPossibleMoves(UI player) {
+    @Override
+    public LinkedList<Move> getPossibleMoves(GameState gameState) {
         LinkedList<Move> moves = new LinkedList<>();
-        Move p;
-        // for white pawns
-        if (color == 0) {
-            // Check for legal moves forward
-            if (x - 1 > 0 && !player.chessBoard[x - 1][y].hasPiece) {
-                // Move one square forward
-                if (x == 6 && !player.chessBoard[x - 2][y].hasPiece) {
-                    p = new Move(x - 2, y);
-                    if (isLegalMove(x, y, p, player))
-                        moves.add(p);
-                }
-                p = new Move(x - 1, y);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-            }
-        }
-        // for black pawns
-        else {
-            // Check for legal moves forward
-            if (x + 1 < 8 && !player.chessBoard[x + 1][y].hasPiece) {
-                // Move one square forward
-                if (x == 1 && !player.chessBoard[x + 2][y].hasPiece) {
-                    p = new Move(x + 2, y);
-                    if (isLegalMove(x, y, p, player)) {
-                        moves.add(p);
-                    }
-                }
-                p = new Move(x + 1, y);
-                if (isLegalMove(x, y, p, player)) {
-                    moves.add(p);
+        
+        // Direction depends on color (white moves up, black moves down)
+        int direction = (color == 0) ? -1 : 1;
+        
+        // Forward move
+        int newX = x + direction;
+        if (gameState.isValidPosition(newX, y) && gameState.getPieceAt(newX, y) == null) {
+            moves.add(new Move(x, y, newX, y));
+            
+            // Initial two-square move
+            if ((color == 0 && x == 6) || (color == 1 && x == 1)) {
+                int twoSquares = x + (2 * direction);
+                if (gameState.getPieceAt(twoSquares, y) == null) {
+                    moves.add(new Move(x, y, twoSquares, y));
                 }
             }
         }
-
-        // white pawns
-        if (color == 0 && x - 1 > 0) {
-            // Checks for capture diagonally left
-            if (y - 1 >= 0 && player.chessBoard[x - 1][y - 1].hasPiece
-                    && player.chessBoard[x - 1][y - 1].piece.color != color) {
-                p = new Move(x - 1, y - 1);
-                if (isLegalMove(x, y, p, player)) {
-                    moves.add(p);
-                }
-            }
-            // Checks for legal capture diagonally right
-            if (y + 1 < 8 && player.chessBoard[x - 1][y + 1].hasPiece
-                    && player.chessBoard[x - 1][y + 1].piece.color != color) {
-                p = new Move(x - 1, y + 1);
-                if (isLegalMove(x, y, p, player)) {
-                    moves.add(p);
+        
+        // Capture moves
+        for (int dy = -1; dy <= 1; dy += 2) {
+            int newY = y + dy;
+            if (gameState.isValidPosition(newX, newY)) {
+                Piece targetPiece = gameState.getPieceAt(newX, newY);
+                if (targetPiece != null && targetPiece.getColor() != this.color) {
+                    moves.add(new Move(x, y, newX, newY));
                 }
             }
         }
-
-        // black pawns
-        else if (color == 1 && x + 1 < 8) {
-            if (y - 1 >= 0 && player.chessBoard[x + 1][y - 1].hasPiece
-                    && player.chessBoard[x + 1][y - 1].piece.color != color) {
-                p = new Move(x + 1, y - 1);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-            }
-            if (y + 1 < 8 && player.chessBoard[x + 1][y + 1].hasPiece
-                    && player.chessBoard[x + 1][y + 1].piece.color != color) {
-                p = new Move(x + 1, y + 1);
-                if (isLegalMove(x, y, p, player))
-                    moves.add(p);
-            }
-        }
+        
         return moves;
     }
 
-    // checks if pawn has moved to determine if it can move forward twice
-    public boolean hasMoved() {
-        return hasMoved;
-    }
-
-    // sets boolean for hasMoved depending on if pawn has moved or not
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
-    }
-
-    // checks valid moves for each piece
-    public boolean isLegalMove(int x, int y, Move move, UI player) {
-        return player.isValidMove(x, y, move.getX(), move.getY(), this);
-    }
-
-    public boolean checked(UI player) {
+    @Override
+    public boolean isLegalMove(int x2, int y2, Move move, GameState gameState) {
+        int direction = (color == 0) ? -1 : 1;
+        int dx = x2 - x;
+        int dy = Math.abs(y2 - y);
+        
+        // Forward move
+        if (dy == 0) {
+            // One square forward
+            if (dx == direction) {
+                return gameState.getPieceAt(x2, y2) == null;
+            }
+            // Initial two squares
+            if (((color == 0 && x == 6) || (color == 1 && x == 1)) && dx == 2 * direction) {
+                return gameState.getPieceAt(x2, y2) == null && 
+                       gameState.getPieceAt(x + direction, y) == null;
+            }
+        }
+        // Capture move
+        else if (dy == 1 && dx == direction) {
+            Piece targetPiece = gameState.getPieceAt(x2, y2);
+            return targetPiece != null && targetPiece.getColor() != this.color;
+        }
+        
         return false;
+    }
+
+    @Override
+    public boolean checked(GameState gameState) {
+        return false; // Pawns don't implement check detection
     }
 }

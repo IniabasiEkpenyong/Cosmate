@@ -6,7 +6,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import src.main.java.com.cosmate.model.ChessVisualizer;
 import src.main.java.com.cosmate.model.King;
+import src.main.java.com.cosmate.service.ChessAI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
