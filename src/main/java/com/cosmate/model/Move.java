@@ -1,3 +1,4 @@
+package src.main.java.com.cosmate.model;
 // This class deals with the coordinate values of the moves of each
 // of the chess pieces
 public class Move {

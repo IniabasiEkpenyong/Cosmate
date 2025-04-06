@@ -1,4 +1,7 @@
+package src.main.java.com.cosmate.model;
 import java.util.LinkedList;
+
+import UI;
 
 // implements basic rules of queen movement
 public class Queen extends Piece {

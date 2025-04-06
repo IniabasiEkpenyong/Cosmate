@@ -1,5 +1,11 @@
 import java.util.LinkedList;
 
+import src.main.java.com.cosmate.model.UI;
+
+import src.main.java.com.cosmate.model.Piece;
+
+import src.main.java.com.cosmate.model.Move;
+
 public class ChessAI {
     private static final int DEPTH = 3; // How many moves ahead to look
     private UI gameUI;
@@ -11,6 +17,10 @@ public class ChessAI {
     private static final int ROOK_VALUE = 500;
     private static final int QUEEN_VALUE = 900;
     private static final int KING_VALUE = 20000;
+
+    // Add field to track previous moves
+    private Move lastMove = null;
+    private Move secondLastMove = null;
 
     public ChessAI(UI ui) {
         this.gameUI = ui;
@@ -53,6 +63,11 @@ public class ChessAI {
                     }
                 }
             }
+        }
+        
+        if (bestMove != null) {
+            secondLastMove = lastMove;
+            lastMove = bestMove[1];
         }
         
         return bestMove;
@@ -135,17 +150,33 @@ public class ChessAI {
     private int evaluatePosition() {
         int score = 0;
         
-        // Material counting
+        // Material evaluation
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (gameUI.chessBoard[i][j].hasPiece) {
-                    int pieceValue = getPieceValue(gameUI.chessBoard[i][j].piece);
-                    if (gameUI.chessBoard[i][j].piece.color == 1) { // Black
+                    Piece piece = gameUI.chessBoard[i][j].piece;
+                    int pieceValue = getPieceValue(piece);
+                    
+                    if (piece.color == 1) {  // Black (AI)
                         score += pieceValue;
-                    } else { // White
+                        // Add development bonus for pieces moved from starting position
+                        if (piece.type != 5 && piece.type != 6) { // Not king or queen
+                            if (i != 0 && i != 1) { // Not in starting rows
+                                score += 10; // Development bonus
+                            }
+                        }
+                    } else {
                         score -= pieceValue;
                     }
                 }
+            }
+        }
+        
+        // Penalize repetitive moves
+        if (lastMove != null && secondLastMove != null) {
+            if (lastMove.getX() == secondLastMove.getX() && 
+                lastMove.getY() == secondLastMove.getY()) {
+                score -= 50; // Penalty for moving back and forth
             }
         }
         

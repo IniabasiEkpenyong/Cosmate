@@ -1,4 +1,7 @@
+package src.main.java.com.cosmate.model;
 import java.util.LinkedList;
+
+import UI;
 
 // Implements the basic rules of the bishop chess piece
 public class Bishop extends Piece {
@@ -22,7 +25,6 @@ public class Bishop extends Piece {
                         p = new Move(x + n, y + n);
                         if (isLegalMove(x, y, p, c)) {
                             moves.add(p);
-                            break;
                         }
                     }
                     break;

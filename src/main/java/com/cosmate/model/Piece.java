@@ -1,4 +1,7 @@
+package src.main.java.com.cosmate.model;
 import java.util.LinkedList;
+
+import UI;
 
 // This abstract class sets the basic rules of how each piece is defined,
 // how each pieces moves are updated, and shows legal moves

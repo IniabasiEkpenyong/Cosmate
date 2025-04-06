@@ -1,6 +1,10 @@
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import src.main.java.com.cosmate.model.Piece;
+
 import java.awt.Color;
 
 // stores chessboard data concerning pieces on square, coordinates and color
